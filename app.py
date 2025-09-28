@@ -231,6 +231,38 @@ def create_multi_chart(selected_stocks_data):
                 ),
                 row=row, col=col
             )
+        # ─── VWAPバンドタッチ検出 ───
+        touch_u2 = df[(df['High'] >= df['vwap_upper_2']) & (df['Low'] <= df['vwap_upper_2'])]
+        touch_l2 = df[(df['High'] >= df['vwap_lower_2']) & (df['Low'] <= df['vwap_lower_2'])]
+        touch_u1 = df[(df['High'] >= df['vwap_upper_1']) & (df['Low'] <= df['vwap_upper_1'])]
+        touch_l1 = df[(df['High'] >= df['vwap_lower_1']) & (df['Low'] <= df['vwap_lower_1'])]
+
+        def add_touch_mark(df_touch, y_col, marker, color):
+            if df_touch.empty:
+                return
+            fig.add_trace(
+                go.Scatter(
+                    x=df_touch.index.strftime('%m/%d'),
+                    y=df_touch[y_col],
+                    mode='markers',
+                    marker_symbol=marker,
+                    marker_size=8,
+                    marker_color=color,
+                    name='touch',
+                    showlegend=False,
+                    hoverinfo='skip'
+                ),
+                row=row, col=col
+            )
+
+        # ±2σタッチ（赤）
+        add_touch_mark(touch_u2, 'vwap_upper_2', 'triangle-up', 'rgba(255,107,107,0.9)')
+        add_touch_mark(touch_l2, 'vwap_lower_2', 'triangle-down', 'rgba(255,107,107,0.9)')
+
+        # ±1σタッチ（灰）
+        add_touch_mark(touch_u1, 'vwap_upper_1', 'triangle-up', 'rgba(128,128,128,0.9)')
+        add_touch_mark(touch_l1, 'vwap_lower_1', 'triangle-down', 'rgba(128,128,128,0.9)')
+
 
     # レイアウト更新（トレーディングビュー風）
     fig.update_layout(
@@ -490,5 +522,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
